@@ -1,2 +1,2 @@
 # SokobanGame
-SokobanGame
+Sokoban Game
