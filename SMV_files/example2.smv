@@ -15,8 +15,8 @@ ASSIGN
     init(pBoard[1][4]) := "#";
     init(pBoard[1][5]) := "#";
     init(pBoard[2][1]) := "#";
-    init(pBoard[2][2]) := "@";
-    init(pBoard[2][3]) := "$";
+    init(pBoard[2][2]) := "$";
+    init(pBoard[2][3]) := "@";
     init(pBoard[2][4]) := ".";
     init(pBoard[2][5]) := "#";
     init(pBoard[3][1]) := "#";
@@ -29,7 +29,7 @@ ASSIGN
     init(box_to_row) := 0;
     init(box_from_col) := 0;
     init(box_from_row) := 0;
-    init(keeper_col) := 2;
+    init(keeper_col) := 3;
     init(keeper_row) := 2;
     init(move) := r;
  

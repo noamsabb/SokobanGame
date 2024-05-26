@@ -192,11 +192,14 @@ ASSIGN
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('fileName', type=str, help='The input filename')
-    #parser.add_argument('solver_engine', type=str, help='The solver engine')
+    parser.add_argument('solver_engine', type=str, nargs='?', default=None, help='The solver engine (optional)')
     args = parser.parse_args()
 
     fileName = "Input/"+args.fileName
 
     create_smv_file(fileName)
     smv_fileName = "SMV_files/"+fileName.replace("Input/", "").replace(".txt", ".smv")
-    run_nuXmv.run_nuxmv_interactive(smv_fileName)
+    if args.solver_engine:
+        run_nuXmv.run_nuxmv_interactive(smv_fileName, args.solver_engine)
+    else:
+        run_nuXmv.run_nuxmv_interactive(smv_fileName)

@@ -24,9 +24,10 @@
 *** Copyright (C) 2009-2019 by University of Trento and others
 *** See http://mathsat.fbk.eu
 
--- specification !(move != 0 U pBoard[goals_position_row[1]][goals_position_col[1]] = "*")  is false
+nuXmv > nuXmv > nuXmv > -- no counterexample found with bound 0
+-- specification !(move != 0 U pBoard[goals_position_row[1]][goals_position_col[1]] = "*")    is false
 -- as demonstrated by the following execution sequence
-Trace Description: LTL Counterexample 
+Trace Description: BMC Counterexample 
 Trace Type: Counterexample 
   -> State: 1.1 <-
     move = r
@@ -63,29 +64,9 @@ Trace Type: Counterexample
     pBoard[2][2] = "-"
     pBoard[2][3] = "@"
     pBoard[2][4] = "*"
-  -- Loop starts here
-  -> State: 1.3 <-
-    move = l
-    keeper_col = 2
-    box_to_row = 0
-    box_to_col = 0
-    box_from_row = 0
-    box_from_col = 0
-    pBoard[2][2] = "@"
-    pBoard[2][3] = "-"
-  -> State: 1.4 <-
-    move = r
-    keeper_col = 3
-    pBoard[2][2] = "-"
-    pBoard[2][3] = "@"
-  -> State: 1.5 <-
-    move = l
-    keeper_col = 2
-    pBoard[2][2] = "@"
-    pBoard[2][3] = "-"
-"
+nuXmv > "
         
 
 LURD Solution: {r}
-Total running time: 0.27 seconds
+Total running time: 0.21 seconds
                     

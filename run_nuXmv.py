@@ -1,8 +1,11 @@
 import subprocess
 import os
+import time
+import LURD_searcher
 
 
-def run_nuxmv_interactive(model_filename):
+def run_nuxmv_interactive(model_filename, solver_engine=None):
+    start_time = time.time()
     # Absolute path to the nuXmv executable
     nuxmv_path = "/Users/noam/Desktop/FormalVerification/Project/sokobanGame/nuXmv"  # Adjust this path if necessary
 
@@ -22,22 +25,43 @@ def run_nuxmv_interactive(model_filename):
     # Print message indicating the nuXmv executable was found
     print(f"nuXmv executable found at: {nuxmv_path}")
 
-    # Start nuXmv in interactive mode
-    nuxmv_process = subprocess.Popen(
-        [nuxmv_path, "-int"],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True
-    )
 
-    # Define the commands to run
-    commands = [
-        f"read_model -i {model_filename}",
-        "go",
-        "check_ltlspec",
-        "quit"
-    ]
+    if solver_engine is None:
+        commands = [nuxmv_path, model_filename]
+        nuxmv_process = subprocess.Popen(
+            commands,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+
+
+    else:
+        # Start nuXmv in interactive mode
+        nuxmv_process = subprocess.Popen(
+            [nuxmv_path, "-int"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+
+    if(solver_engine == "BDD"):
+        # Define the commands to run
+        commands = [
+            f"read_model -i {model_filename}",
+            "go",
+            "check_ltlspec",
+            "quit"
+        ]
+    if(solver_engine == "SAT"):
+        # Define the commands to run
+        commands = [
+            f"read_model -i {model_filename}",
+            "go_bmc",
+            "check_ltlspec_bmc",
+            "quit"
+        ]
     # Join the commands into a single string with newline characters
     command_string = "\n".join(commands) + "\n"
 
@@ -56,17 +80,35 @@ def run_nuxmv_interactive(model_filename):
         print("nuXmv errors:")
         print(stderr)
 
+        # End the timer
+    end_time = time.time()
+
+    # Calculate and print the elapsed time
+    elapsed_time = end_time - start_time
+
     # Save the output to a file
-    output_filename = os.path.join(output_dir, os.path.basename(model_filename).split(".")[0] + ".out")
+    if solver_engine is None:
+        output_filename = os.path.join(output_dir,os.path.basename(model_filename).split(".")[0] + ".out")
+    else:
+        output_filename = os.path.join(output_dir, os.path.basename(model_filename).split(".")[0] + "_" + solver_engine + ".out")
     with open(output_filename, "w") as f:
         f.write(stdout)
 
 
+    LURD =  LURD_searcher.found_LURD(output_filename)
+
+    with open(output_filename, "a") as f:
+        if (LURD == "{}"):
+            f.write(f'\n\nNo solution found, board is not solvable')
+            f.write(f'\nTotal running time: {elapsed_time:.2f} seconds')
+        else:
+            f.write(f""""
+        \n
+LURD Solution: {LURD}
+Total running time: {elapsed_time:.2f} seconds
+                    """)
+
     print(f"Output saved to {output_filename}")
 
+
     return output_filename
-
-
-# Example usage
-model_filename = "example1.smv"  # Replace with your actual model filename
-run_nuxmv_interactive(model_filename)
