@@ -1,3 +1,4 @@
+import re
 import subprocess
 import os
 import time
@@ -25,6 +26,19 @@ def run_nuxmv_interactive(model_filename, solver_engine=None):
     # Print message indicating the nuXmv executable was found
     print(f"nuXmv executable found at: {nuxmv_path}")
 
+    ltlspec_pattern = re.compile(r'LTLSPEC NAME (\w+):=')
+
+    # List to store the extracted LTLSPEC names
+    ltlspec_names = []
+
+    # Open and read the SMV file
+    with open(out, "r") as file:
+        for line in file:
+            # Search for the pattern in the current line
+            match = ltlspec_pattern.search(line)
+            if match:
+                # Extract the LTLSPEC name and add it to the list
+                ltlspec_names.append(match.group(1).strip())
 
     if solver_engine is None:
         commands = [nuxmv_path, model_filename]
