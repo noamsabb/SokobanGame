@@ -1,3 +1,7 @@
+import argparse
+import os
+import run_nuXmv
+
 import board_builder
 
 
@@ -7,7 +11,12 @@ def create_smv_file(fileName):
     pBoard_col = len(pBoard[0])
     pBoard_row = len(pBoard)
 
-    smv_file_name = fileName.rstrip(".txt") + ".smv"
+    output_dir = "SMV_files"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"Created directory: {output_dir}")
+    fileName = fileName.replace("Input/", "")
+    smv_file_name = output_dir + "/" + fileName.rstrip(".txt") + ".smv"
     with open(smv_file_name, "w") as f:
         f.write(f"""MODULE main
 VAR
@@ -181,4 +190,13 @@ ASSIGN
 
 
 if __name__ == "__main__":
-    create_smv_file("example5.txt")
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('fileName', type=str, help='The input filename')
+    #parser.add_argument('solver_engine', type=str, help='The solver engine')
+    args = parser.parse_args()
+
+    fileName = "Input/"+args.fileName
+
+    create_smv_file(fileName)
+    smv_fileName = "SMV_files/"+fileName.replace("Input/", "").replace(".txt", ".smv")
+    run_nuXmv.run_nuxmv_interactive(smv_fileName)

@@ -1,0 +1,551 @@
+MODULE main
+VAR
+    move : {u, d, l, r, p_u, p_d, p_l, p_r, 0};
+    keeper_col : 1..8;
+    keeper_row : 1..7;
+    box_to_row : 0..7;
+    box_to_col : 0..8;
+    box_from_row : 0..7;
+    box_from_col : 0..8;
+    pBoard : array 1..7 of array 1..8 of {"-", "#", ".", "*", "+", "$", "@"};
+ASSIGN
+    init(pBoard[1][1]) := "#";
+    init(pBoard[1][2]) := "#";
+    init(pBoard[1][3]) := "#";
+    init(pBoard[1][4]) := "#";
+    init(pBoard[1][5]) := "#";
+    init(pBoard[1][6]) := "#";
+    init(pBoard[1][7]) := "#";
+    init(pBoard[1][8]) := "#";
+    init(pBoard[2][1]) := "#";
+    init(pBoard[2][2]) := "@";
+    init(pBoard[2][3]) := "-";
+    init(pBoard[2][4]) := "-";
+    init(pBoard[2][5]) := "-";
+    init(pBoard[2][6]) := "-";
+    init(pBoard[2][7]) := "-";
+    init(pBoard[2][8]) := "#";
+    init(pBoard[3][1]) := "#";
+    init(pBoard[3][2]) := "-";
+    init(pBoard[3][3]) := "-";
+    init(pBoard[3][4]) := "-";
+    init(pBoard[3][5]) := "-";
+    init(pBoard[3][6]) := "#";
+    init(pBoard[3][7]) := "#";
+    init(pBoard[3][8]) := "#";
+    init(pBoard[4][1]) := "#";
+    init(pBoard[4][2]) := "-";
+    init(pBoard[4][3]) := "$";
+    init(pBoard[4][4]) := "-";
+    init(pBoard[4][5]) := "#";
+    init(pBoard[4][6]) := "-";
+    init(pBoard[4][7]) := "-";
+    init(pBoard[4][8]) := "#";
+    init(pBoard[5][1]) := "#";
+    init(pBoard[5][2]) := "-";
+    init(pBoard[5][3]) := "-";
+    init(pBoard[5][4]) := "-";
+    init(pBoard[5][5]) := "#";
+    init(pBoard[5][6]) := "-";
+    init(pBoard[5][7]) := "$";
+    init(pBoard[5][8]) := "#";
+    init(pBoard[6][1]) := "#";
+    init(pBoard[6][2]) := "-";
+    init(pBoard[6][3]) := ".";
+    init(pBoard[6][4]) := "-";
+    init(pBoard[6][5]) := "#";
+    init(pBoard[6][6]) := "-";
+    init(pBoard[6][7]) := ".";
+    init(pBoard[6][8]) := "#";
+    init(pBoard[7][1]) := "#";
+    init(pBoard[7][2]) := "#";
+    init(pBoard[7][3]) := "#";
+    init(pBoard[7][4]) := "#";
+    init(pBoard[7][5]) := "#";
+    init(pBoard[7][6]) := "#";
+    init(pBoard[7][7]) := "#";
+    init(pBoard[7][8]) := "#";
+ 
+    init(box_to_col) := 0;
+    init(box_to_row) := 0;
+    init(box_from_col) := 0;
+    init(box_from_row) := 0;
+    init(keeper_col) := 2;
+    init(keeper_row) := 2;
+    init(move) := r;
+ 
+    next(move) := 
+    case
+        (keeper_row > 2 )&(pBoard[(keeper_row) - 1][keeper_col] = "-" | pBoard[(keeper_row)-1][keeper_col] = ".") : u;
+        TRUE : 0;
+    esac union
+    case
+        (keeper_row < 7 -1 )&(pBoard[keeper_row+1][keeper_col] = "-" | pBoard[keeper_row+1][keeper_col] = ".") : d;
+     TRUE : 0;
+    esac union
+    case
+        (keeper_col > 2 )&(pBoard[keeper_row][(keeper_col)-1] = "-" | pBoard[keeper_row][(keeper_col)-1] = ".") : l;
+     TRUE : 0;
+    esac union
+    case
+        (keeper_col < 8 -1)&(pBoard[keeper_row][keeper_col+1] = "-" | pBoard[keeper_row][keeper_col+1] = ".") : r;
+     TRUE : 0;
+    esac union
+    case
+        (keeper_row > 3)&(pBoard[(keeper_row)-1][keeper_col] = "$" | pBoard[(keeper_row)-1][keeper_col] = "*") & (pBoard[(keeper_row)-2][keeper_col] = "-" | pBoard[(keeper_row)-2][keeper_col] = ".") : p_u;
+        TRUE : 0;
+    esac union
+    case
+        (keeper_row < 7-2 )&(pBoard[keeper_row+1][keeper_col] = "$" | pBoard[keeper_row+1][keeper_col] = "*") & (pBoard[keeper_row+2][keeper_col] = "-" | pBoard[keeper_row+2][keeper_col] = ".") : p_d;
+        TRUE : 0;
+    esac union
+    case
+        (keeper_col > 3)&(pBoard[keeper_row][(keeper_col)-1] = "$" | pBoard[keeper_row][(keeper_col)-1] = "*") & (pBoard[keeper_row][(keeper_col)-2] = "-" | pBoard[keeper_row][(keeper_col)-2] = ".") : p_l;
+        TRUE : 0;
+    esac union
+    case
+        (keeper_col < 8-2 )&(pBoard[keeper_row][keeper_col+1] = "$" | pBoard[keeper_row][keeper_col+1] = "*") & (pBoard[keeper_row][keeper_col+2] = "-" | pBoard[keeper_row][keeper_col+2] = ".") : p_r;
+        TRUE : 0;
+    esac union 0;
+
+
+    next(box_to_row):= case
+        (next(move) = p_u)& (keeper_row > 3): keeper_row -2;
+        (next(move) = p_d) & (keeper_row < 5): keeper_row + 2;
+        (next(move) = p_r) : keeper_row;
+        (next(move) = p_l) : keeper_row;
+        TRUE : 0;
+    esac;
+
+    next(box_to_col):= case
+        (next(move) = p_r)& (keeper_col < 6) : keeper_col + 2;
+        (next(move) = p_l)& (keeper_col > 3) : keeper_col - 2;
+        (next(move) = p_u) : keeper_col;
+        (next(move) = p_d) : keeper_col;
+        TRUE : 0;
+    esac;
+
+        next(box_from_row):= case
+        (next(move) = p_u) & (keeper_row > 1) : keeper_row - 1;
+        (next(move) = p_d) & (keeper_row < 5): keeper_row + 1;
+        (next(move) = p_r) : keeper_row ;
+        (next(move) = p_l) : keeper_row;
+        TRUE : 0;
+    esac;
+
+    next(box_from_col):= case
+        (next(move) = p_r) & (keeper_col < 6): keeper_col + 1;
+        (next(move) = p_l) & (keeper_col > 2): keeper_col - 1;
+        (next(move) = p_u) : keeper_col;
+        (next(move) = p_d) : keeper_col;
+        TRUE : 0;
+    esac;
+
+
+    next(keeper_row):= case
+        ((next(move) = u) | (next(move) = p_u) ) & (keeper_row > 2): keeper_row - 1;
+        ((next(move) = d) | (next(move) = p_d) ) & (keeper_row < 6) : keeper_row + 1;
+        TRUE : keeper_row;
+    esac;
+
+    next(keeper_col):= case
+        ((next(move) = l) | (next(move) = p_l)) & (keeper_col > 1 ) : keeper_col - 1;
+        ((next(move) = r) | (next(move) = p_r) )& (keeper_col < 7 ) : keeper_col + 1;
+        TRUE : keeper_col;
+    esac;
+  
+    next(pBoard[1][1]) := pBoard[1][1];
+  
+    next(pBoard[1][2]) := pBoard[1][2];
+  
+    next(pBoard[1][3]) := pBoard[1][3];
+  
+    next(pBoard[1][4]) := pBoard[1][4];
+  
+    next(pBoard[1][5]) := pBoard[1][5];
+  
+    next(pBoard[1][6]) := pBoard[1][6];
+  
+    next(pBoard[1][7]) := pBoard[1][7];
+  
+    next(pBoard[1][8]) := pBoard[1][8];
+  
+    next(pBoard[2][1]) := pBoard[2][1];
+
+    next(pBoard[2][2]):= case
+        (pBoard[2][2] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[2][2] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[2][2] = "-" | pBoard[2][2] = "$") & next(keeper_row)=2 & next(keeper_col)=2 : "@";
+        (pBoard[2][2] = "." | pBoard[2][2] = "*") & next(keeper_row)=2 & next(keeper_col)=2 : "+";
+        (pBoard[2][2] = "-") & next(box_to_row=2) &  next(box_to_col=2) : "$";
+        (pBoard[2][2] = ".") & next(box_to_row=2) &  next(box_to_col=2) : "*";
+        (pBoard[2][2] = "$") & next(box_from_row=2) &  next(box_from_col=2) : "-";
+        (pBoard[2][2] = "*") & next(box_from_row=2) &  next(box_from_col=2) : ".";
+        TRUE : pBoard[2][2];
+        esac;
+
+        
+    next(pBoard[2][3]):= case
+        (pBoard[2][3] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[2][3] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[2][3] = "-" | pBoard[2][3] = "$") & next(keeper_row)=2 & next(keeper_col)=3 : "@";
+        (pBoard[2][3] = "." | pBoard[2][3] = "*") & next(keeper_row)=2 & next(keeper_col)=3 : "+";
+        (pBoard[2][3] = "-") & next(box_to_row=2) &  next(box_to_col=3) : "$";
+        (pBoard[2][3] = ".") & next(box_to_row=2) &  next(box_to_col=3) : "*";
+        (pBoard[2][3] = "$") & next(box_from_row=2) &  next(box_from_col=3) : "-";
+        (pBoard[2][3] = "*") & next(box_from_row=2) &  next(box_from_col=3) : ".";
+        TRUE : pBoard[2][3];
+        esac;
+
+        
+    next(pBoard[2][4]):= case
+        (pBoard[2][4] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[2][4] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[2][4] = "-" | pBoard[2][4] = "$") & next(keeper_row)=2 & next(keeper_col)=4 : "@";
+        (pBoard[2][4] = "." | pBoard[2][4] = "*") & next(keeper_row)=2 & next(keeper_col)=4 : "+";
+        (pBoard[2][4] = "-") & next(box_to_row=2) &  next(box_to_col=4) : "$";
+        (pBoard[2][4] = ".") & next(box_to_row=2) &  next(box_to_col=4) : "*";
+        (pBoard[2][4] = "$") & next(box_from_row=2) &  next(box_from_col=4) : "-";
+        (pBoard[2][4] = "*") & next(box_from_row=2) &  next(box_from_col=4) : ".";
+        TRUE : pBoard[2][4];
+        esac;
+
+        
+    next(pBoard[2][5]):= case
+        (pBoard[2][5] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[2][5] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[2][5] = "-" | pBoard[2][5] = "$") & next(keeper_row)=2 & next(keeper_col)=5 : "@";
+        (pBoard[2][5] = "." | pBoard[2][5] = "*") & next(keeper_row)=2 & next(keeper_col)=5 : "+";
+        (pBoard[2][5] = "-") & next(box_to_row=2) &  next(box_to_col=5) : "$";
+        (pBoard[2][5] = ".") & next(box_to_row=2) &  next(box_to_col=5) : "*";
+        (pBoard[2][5] = "$") & next(box_from_row=2) &  next(box_from_col=5) : "-";
+        (pBoard[2][5] = "*") & next(box_from_row=2) &  next(box_from_col=5) : ".";
+        TRUE : pBoard[2][5];
+        esac;
+
+        
+    next(pBoard[2][6]):= case
+        (pBoard[2][6] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[2][6] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[2][6] = "-" | pBoard[2][6] = "$") & next(keeper_row)=2 & next(keeper_col)=6 : "@";
+        (pBoard[2][6] = "." | pBoard[2][6] = "*") & next(keeper_row)=2 & next(keeper_col)=6 : "+";
+        (pBoard[2][6] = "-") & next(box_to_row=2) &  next(box_to_col=6) : "$";
+        (pBoard[2][6] = ".") & next(box_to_row=2) &  next(box_to_col=6) : "*";
+        (pBoard[2][6] = "$") & next(box_from_row=2) &  next(box_from_col=6) : "-";
+        (pBoard[2][6] = "*") & next(box_from_row=2) &  next(box_from_col=6) : ".";
+        TRUE : pBoard[2][6];
+        esac;
+
+        
+    next(pBoard[2][7]):= case
+        (pBoard[2][7] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[2][7] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[2][7] = "-" | pBoard[2][7] = "$") & next(keeper_row)=2 & next(keeper_col)=7 : "@";
+        (pBoard[2][7] = "." | pBoard[2][7] = "*") & next(keeper_row)=2 & next(keeper_col)=7 : "+";
+        (pBoard[2][7] = "-") & next(box_to_row=2) &  next(box_to_col=7) : "$";
+        (pBoard[2][7] = ".") & next(box_to_row=2) &  next(box_to_col=7) : "*";
+        (pBoard[2][7] = "$") & next(box_from_row=2) &  next(box_from_col=7) : "-";
+        (pBoard[2][7] = "*") & next(box_from_row=2) &  next(box_from_col=7) : ".";
+        TRUE : pBoard[2][7];
+        esac;
+
+          
+    next(pBoard[2][8]) := pBoard[2][8];
+  
+    next(pBoard[3][1]) := pBoard[3][1];
+
+    next(pBoard[3][2]):= case
+        (pBoard[3][2] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[3][2] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[3][2] = "-" | pBoard[3][2] = "$") & next(keeper_row)=3 & next(keeper_col)=2 : "@";
+        (pBoard[3][2] = "." | pBoard[3][2] = "*") & next(keeper_row)=3 & next(keeper_col)=2 : "+";
+        (pBoard[3][2] = "-") & next(box_to_row=3) &  next(box_to_col=2) : "$";
+        (pBoard[3][2] = ".") & next(box_to_row=3) &  next(box_to_col=2) : "*";
+        (pBoard[3][2] = "$") & next(box_from_row=3) &  next(box_from_col=2) : "-";
+        (pBoard[3][2] = "*") & next(box_from_row=3) &  next(box_from_col=2) : ".";
+        TRUE : pBoard[3][2];
+        esac;
+
+        
+    next(pBoard[3][3]):= case
+        (pBoard[3][3] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[3][3] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[3][3] = "-" | pBoard[3][3] = "$") & next(keeper_row)=3 & next(keeper_col)=3 : "@";
+        (pBoard[3][3] = "." | pBoard[3][3] = "*") & next(keeper_row)=3 & next(keeper_col)=3 : "+";
+        (pBoard[3][3] = "-") & next(box_to_row=3) &  next(box_to_col=3) : "$";
+        (pBoard[3][3] = ".") & next(box_to_row=3) &  next(box_to_col=3) : "*";
+        (pBoard[3][3] = "$") & next(box_from_row=3) &  next(box_from_col=3) : "-";
+        (pBoard[3][3] = "*") & next(box_from_row=3) &  next(box_from_col=3) : ".";
+        TRUE : pBoard[3][3];
+        esac;
+
+        
+    next(pBoard[3][4]):= case
+        (pBoard[3][4] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[3][4] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[3][4] = "-" | pBoard[3][4] = "$") & next(keeper_row)=3 & next(keeper_col)=4 : "@";
+        (pBoard[3][4] = "." | pBoard[3][4] = "*") & next(keeper_row)=3 & next(keeper_col)=4 : "+";
+        (pBoard[3][4] = "-") & next(box_to_row=3) &  next(box_to_col=4) : "$";
+        (pBoard[3][4] = ".") & next(box_to_row=3) &  next(box_to_col=4) : "*";
+        (pBoard[3][4] = "$") & next(box_from_row=3) &  next(box_from_col=4) : "-";
+        (pBoard[3][4] = "*") & next(box_from_row=3) &  next(box_from_col=4) : ".";
+        TRUE : pBoard[3][4];
+        esac;
+
+        
+    next(pBoard[3][5]):= case
+        (pBoard[3][5] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[3][5] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[3][5] = "-" | pBoard[3][5] = "$") & next(keeper_row)=3 & next(keeper_col)=5 : "@";
+        (pBoard[3][5] = "." | pBoard[3][5] = "*") & next(keeper_row)=3 & next(keeper_col)=5 : "+";
+        (pBoard[3][5] = "-") & next(box_to_row=3) &  next(box_to_col=5) : "$";
+        (pBoard[3][5] = ".") & next(box_to_row=3) &  next(box_to_col=5) : "*";
+        (pBoard[3][5] = "$") & next(box_from_row=3) &  next(box_from_col=5) : "-";
+        (pBoard[3][5] = "*") & next(box_from_row=3) &  next(box_from_col=5) : ".";
+        TRUE : pBoard[3][5];
+        esac;
+
+          
+    next(pBoard[3][6]) := pBoard[3][6];
+  
+    next(pBoard[3][7]) := pBoard[3][7];
+  
+    next(pBoard[3][8]) := pBoard[3][8];
+  
+    next(pBoard[4][1]) := pBoard[4][1];
+
+    next(pBoard[4][2]):= case
+        (pBoard[4][2] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[4][2] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[4][2] = "-" | pBoard[4][2] = "$") & next(keeper_row)=4 & next(keeper_col)=2 : "@";
+        (pBoard[4][2] = "." | pBoard[4][2] = "*") & next(keeper_row)=4 & next(keeper_col)=2 : "+";
+        (pBoard[4][2] = "-") & next(box_to_row=4) &  next(box_to_col=2) : "$";
+        (pBoard[4][2] = ".") & next(box_to_row=4) &  next(box_to_col=2) : "*";
+        (pBoard[4][2] = "$") & next(box_from_row=4) &  next(box_from_col=2) : "-";
+        (pBoard[4][2] = "*") & next(box_from_row=4) &  next(box_from_col=2) : ".";
+        TRUE : pBoard[4][2];
+        esac;
+
+        
+    next(pBoard[4][3]):= case
+        (pBoard[4][3] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[4][3] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[4][3] = "-" | pBoard[4][3] = "$") & next(keeper_row)=4 & next(keeper_col)=3 : "@";
+        (pBoard[4][3] = "." | pBoard[4][3] = "*") & next(keeper_row)=4 & next(keeper_col)=3 : "+";
+        (pBoard[4][3] = "-") & next(box_to_row=4) &  next(box_to_col=3) : "$";
+        (pBoard[4][3] = ".") & next(box_to_row=4) &  next(box_to_col=3) : "*";
+        (pBoard[4][3] = "$") & next(box_from_row=4) &  next(box_from_col=3) : "-";
+        (pBoard[4][3] = "*") & next(box_from_row=4) &  next(box_from_col=3) : ".";
+        TRUE : pBoard[4][3];
+        esac;
+
+        
+    next(pBoard[4][4]):= case
+        (pBoard[4][4] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[4][4] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[4][4] = "-" | pBoard[4][4] = "$") & next(keeper_row)=4 & next(keeper_col)=4 : "@";
+        (pBoard[4][4] = "." | pBoard[4][4] = "*") & next(keeper_row)=4 & next(keeper_col)=4 : "+";
+        (pBoard[4][4] = "-") & next(box_to_row=4) &  next(box_to_col=4) : "$";
+        (pBoard[4][4] = ".") & next(box_to_row=4) &  next(box_to_col=4) : "*";
+        (pBoard[4][4] = "$") & next(box_from_row=4) &  next(box_from_col=4) : "-";
+        (pBoard[4][4] = "*") & next(box_from_row=4) &  next(box_from_col=4) : ".";
+        TRUE : pBoard[4][4];
+        esac;
+
+          
+    next(pBoard[4][5]) := pBoard[4][5];
+
+    next(pBoard[4][6]):= case
+        (pBoard[4][6] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[4][6] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[4][6] = "-" | pBoard[4][6] = "$") & next(keeper_row)=4 & next(keeper_col)=6 : "@";
+        (pBoard[4][6] = "." | pBoard[4][6] = "*") & next(keeper_row)=4 & next(keeper_col)=6 : "+";
+        (pBoard[4][6] = "-") & next(box_to_row=4) &  next(box_to_col=6) : "$";
+        (pBoard[4][6] = ".") & next(box_to_row=4) &  next(box_to_col=6) : "*";
+        (pBoard[4][6] = "$") & next(box_from_row=4) &  next(box_from_col=6) : "-";
+        (pBoard[4][6] = "*") & next(box_from_row=4) &  next(box_from_col=6) : ".";
+        TRUE : pBoard[4][6];
+        esac;
+
+        
+    next(pBoard[4][7]):= case
+        (pBoard[4][7] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[4][7] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[4][7] = "-" | pBoard[4][7] = "$") & next(keeper_row)=4 & next(keeper_col)=7 : "@";
+        (pBoard[4][7] = "." | pBoard[4][7] = "*") & next(keeper_row)=4 & next(keeper_col)=7 : "+";
+        (pBoard[4][7] = "-") & next(box_to_row=4) &  next(box_to_col=7) : "$";
+        (pBoard[4][7] = ".") & next(box_to_row=4) &  next(box_to_col=7) : "*";
+        (pBoard[4][7] = "$") & next(box_from_row=4) &  next(box_from_col=7) : "-";
+        (pBoard[4][7] = "*") & next(box_from_row=4) &  next(box_from_col=7) : ".";
+        TRUE : pBoard[4][7];
+        esac;
+
+          
+    next(pBoard[4][8]) := pBoard[4][8];
+  
+    next(pBoard[5][1]) := pBoard[5][1];
+
+    next(pBoard[5][2]):= case
+        (pBoard[5][2] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[5][2] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[5][2] = "-" | pBoard[5][2] = "$") & next(keeper_row)=5 & next(keeper_col)=2 : "@";
+        (pBoard[5][2] = "." | pBoard[5][2] = "*") & next(keeper_row)=5 & next(keeper_col)=2 : "+";
+        (pBoard[5][2] = "-") & next(box_to_row=5) &  next(box_to_col=2) : "$";
+        (pBoard[5][2] = ".") & next(box_to_row=5) &  next(box_to_col=2) : "*";
+        (pBoard[5][2] = "$") & next(box_from_row=5) &  next(box_from_col=2) : "-";
+        (pBoard[5][2] = "*") & next(box_from_row=5) &  next(box_from_col=2) : ".";
+        TRUE : pBoard[5][2];
+        esac;
+
+        
+    next(pBoard[5][3]):= case
+        (pBoard[5][3] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[5][3] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[5][3] = "-" | pBoard[5][3] = "$") & next(keeper_row)=5 & next(keeper_col)=3 : "@";
+        (pBoard[5][3] = "." | pBoard[5][3] = "*") & next(keeper_row)=5 & next(keeper_col)=3 : "+";
+        (pBoard[5][3] = "-") & next(box_to_row=5) &  next(box_to_col=3) : "$";
+        (pBoard[5][3] = ".") & next(box_to_row=5) &  next(box_to_col=3) : "*";
+        (pBoard[5][3] = "$") & next(box_from_row=5) &  next(box_from_col=3) : "-";
+        (pBoard[5][3] = "*") & next(box_from_row=5) &  next(box_from_col=3) : ".";
+        TRUE : pBoard[5][3];
+        esac;
+
+        
+    next(pBoard[5][4]):= case
+        (pBoard[5][4] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[5][4] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[5][4] = "-" | pBoard[5][4] = "$") & next(keeper_row)=5 & next(keeper_col)=4 : "@";
+        (pBoard[5][4] = "." | pBoard[5][4] = "*") & next(keeper_row)=5 & next(keeper_col)=4 : "+";
+        (pBoard[5][4] = "-") & next(box_to_row=5) &  next(box_to_col=4) : "$";
+        (pBoard[5][4] = ".") & next(box_to_row=5) &  next(box_to_col=4) : "*";
+        (pBoard[5][4] = "$") & next(box_from_row=5) &  next(box_from_col=4) : "-";
+        (pBoard[5][4] = "*") & next(box_from_row=5) &  next(box_from_col=4) : ".";
+        TRUE : pBoard[5][4];
+        esac;
+
+          
+    next(pBoard[5][5]) := pBoard[5][5];
+
+    next(pBoard[5][6]):= case
+        (pBoard[5][6] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[5][6] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[5][6] = "-" | pBoard[5][6] = "$") & next(keeper_row)=5 & next(keeper_col)=6 : "@";
+        (pBoard[5][6] = "." | pBoard[5][6] = "*") & next(keeper_row)=5 & next(keeper_col)=6 : "+";
+        (pBoard[5][6] = "-") & next(box_to_row=5) &  next(box_to_col=6) : "$";
+        (pBoard[5][6] = ".") & next(box_to_row=5) &  next(box_to_col=6) : "*";
+        (pBoard[5][6] = "$") & next(box_from_row=5) &  next(box_from_col=6) : "-";
+        (pBoard[5][6] = "*") & next(box_from_row=5) &  next(box_from_col=6) : ".";
+        TRUE : pBoard[5][6];
+        esac;
+
+        
+    next(pBoard[5][7]):= case
+        (pBoard[5][7] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[5][7] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[5][7] = "-" | pBoard[5][7] = "$") & next(keeper_row)=5 & next(keeper_col)=7 : "@";
+        (pBoard[5][7] = "." | pBoard[5][7] = "*") & next(keeper_row)=5 & next(keeper_col)=7 : "+";
+        (pBoard[5][7] = "-") & next(box_to_row=5) &  next(box_to_col=7) : "$";
+        (pBoard[5][7] = ".") & next(box_to_row=5) &  next(box_to_col=7) : "*";
+        (pBoard[5][7] = "$") & next(box_from_row=5) &  next(box_from_col=7) : "-";
+        (pBoard[5][7] = "*") & next(box_from_row=5) &  next(box_from_col=7) : ".";
+        TRUE : pBoard[5][7];
+        esac;
+
+          
+    next(pBoard[5][8]) := pBoard[5][8];
+  
+    next(pBoard[6][1]) := pBoard[6][1];
+
+    next(pBoard[6][2]):= case
+        (pBoard[6][2] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[6][2] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[6][2] = "-" | pBoard[6][2] = "$") & next(keeper_row)=6 & next(keeper_col)=2 : "@";
+        (pBoard[6][2] = "." | pBoard[6][2] = "*") & next(keeper_row)=6 & next(keeper_col)=2 : "+";
+        (pBoard[6][2] = "-") & next(box_to_row=6) &  next(box_to_col=2) : "$";
+        (pBoard[6][2] = ".") & next(box_to_row=6) &  next(box_to_col=2) : "*";
+        (pBoard[6][2] = "$") & next(box_from_row=6) &  next(box_from_col=2) : "-";
+        (pBoard[6][2] = "*") & next(box_from_row=6) &  next(box_from_col=2) : ".";
+        TRUE : pBoard[6][2];
+        esac;
+
+        
+    next(pBoard[6][3]):= case
+        (pBoard[6][3] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[6][3] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[6][3] = "-" | pBoard[6][3] = "$") & next(keeper_row)=6 & next(keeper_col)=3 : "@";
+        (pBoard[6][3] = "." | pBoard[6][3] = "*") & next(keeper_row)=6 & next(keeper_col)=3 : "+";
+        (pBoard[6][3] = "-") & next(box_to_row=6) &  next(box_to_col=3) : "$";
+        (pBoard[6][3] = ".") & next(box_to_row=6) &  next(box_to_col=3) : "*";
+        (pBoard[6][3] = "$") & next(box_from_row=6) &  next(box_from_col=3) : "-";
+        (pBoard[6][3] = "*") & next(box_from_row=6) &  next(box_from_col=3) : ".";
+        TRUE : pBoard[6][3];
+        esac;
+
+        
+    next(pBoard[6][4]):= case
+        (pBoard[6][4] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[6][4] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[6][4] = "-" | pBoard[6][4] = "$") & next(keeper_row)=6 & next(keeper_col)=4 : "@";
+        (pBoard[6][4] = "." | pBoard[6][4] = "*") & next(keeper_row)=6 & next(keeper_col)=4 : "+";
+        (pBoard[6][4] = "-") & next(box_to_row=6) &  next(box_to_col=4) : "$";
+        (pBoard[6][4] = ".") & next(box_to_row=6) &  next(box_to_col=4) : "*";
+        (pBoard[6][4] = "$") & next(box_from_row=6) &  next(box_from_col=4) : "-";
+        (pBoard[6][4] = "*") & next(box_from_row=6) &  next(box_from_col=4) : ".";
+        TRUE : pBoard[6][4];
+        esac;
+
+          
+    next(pBoard[6][5]) := pBoard[6][5];
+
+    next(pBoard[6][6]):= case
+        (pBoard[6][6] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[6][6] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[6][6] = "-" | pBoard[6][6] = "$") & next(keeper_row)=6 & next(keeper_col)=6 : "@";
+        (pBoard[6][6] = "." | pBoard[6][6] = "*") & next(keeper_row)=6 & next(keeper_col)=6 : "+";
+        (pBoard[6][6] = "-") & next(box_to_row=6) &  next(box_to_col=6) : "$";
+        (pBoard[6][6] = ".") & next(box_to_row=6) &  next(box_to_col=6) : "*";
+        (pBoard[6][6] = "$") & next(box_from_row=6) &  next(box_from_col=6) : "-";
+        (pBoard[6][6] = "*") & next(box_from_row=6) &  next(box_from_col=6) : ".";
+        TRUE : pBoard[6][6];
+        esac;
+
+        
+    next(pBoard[6][7]):= case
+        (pBoard[6][7] = "+")& (next(move) !=0 ) : ".";
+        (pBoard[6][7] = "@")& (next(move) !=0 ) : "-";
+        (pBoard[6][7] = "-" | pBoard[6][7] = "$") & next(keeper_row)=6 & next(keeper_col)=7 : "@";
+        (pBoard[6][7] = "." | pBoard[6][7] = "*") & next(keeper_row)=6 & next(keeper_col)=7 : "+";
+        (pBoard[6][7] = "-") & next(box_to_row=6) &  next(box_to_col=7) : "$";
+        (pBoard[6][7] = ".") & next(box_to_row=6) &  next(box_to_col=7) : "*";
+        (pBoard[6][7] = "$") & next(box_from_row=6) &  next(box_from_col=7) : "-";
+        (pBoard[6][7] = "*") & next(box_from_row=6) &  next(box_from_col=7) : ".";
+        TRUE : pBoard[6][7];
+        esac;
+
+          
+    next(pBoard[6][8]) := pBoard[6][8];
+  
+    next(pBoard[7][1]) := pBoard[7][1];
+  
+    next(pBoard[7][2]) := pBoard[7][2];
+  
+    next(pBoard[7][3]) := pBoard[7][3];
+  
+    next(pBoard[7][4]) := pBoard[7][4];
+  
+    next(pBoard[7][5]) := pBoard[7][5];
+  
+    next(pBoard[7][6]) := pBoard[7][6];
+  
+    next(pBoard[7][7]) := pBoard[7][7];
+  
+    next(pBoard[7][8]) := pBoard[7][8];
+
+DEFINE
+    goals_position_col[1] := 3;
+    goals_position_col[2] := 7;
+    goals_position_row[1] := 6;
+    goals_position_row[2] := 6;
+
+    LTLSPEC !((move!=0) U ((pBoard[goals_position_row[1]][goals_position_col[1]] = "*") & (pBoard[goals_position_row[2]][goals_position_col[2]] = "*")));    
+        
